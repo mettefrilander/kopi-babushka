@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="utf-8">
+    <title>Document</title>
+    <style>
+        .templatemodtager {
+            display: grid;
+            height: 100vh;
+            grid-template-columns: repeat(4, 2fr);
+            grid-template-rows: auto;
+            grid-gap: 20px 10px;
+            max-width: 1024px;
+            margin: 0 auto;
+        }
+        
+        .person {
+            border: 1px solid #666;
+            padding: 10px;
+            display: grid;
+        }
+        
+        .person:nth-child(odd) {
+            background: #ccc;
+        }
+        
+        @media screen and (max-width:710px) {
+            .templatemodtager {
+                max-width: 100%;
+            }
+        }
+        
+        .templatemodtager {
+            max-width: 100%;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <button id="filter-alle">Alle</button>
+        <button id="filter-forretter">Forretter</button>
+        <button id="filter-hovedretter">Hovedretter</button>
+        <button id="filter-desserter">Dessert</button>
+        <button id="filter-drikkevarer">Drikkevarer</button>
+    </nav>
+    <main>
+        <h1 id="overskrift" data-overskrift>menu</h1>
+        <section id="menu-container" data-container></section>
+    </main>
+    <div class="templatemodtager"></div>
+    <template class="mytemplate">
+        <div class="person">
+            <h1 class="navn"></h1> <img class="billede" src="" alt="">
+            <p class="kortbeskrivelse"></p>
+            <p class="langbeskrivelse"></p>
+            <p class="kategori"></p>
+            <article class="dessert"></article>
+            <p class="pris"></p>
+        </div>
+    </template>
+    <script>
+        let retter = [];
+        document.addEventListener("DOMContentLoaded", loadJson);
+        async function loadJson() {
+            let minListe = await fetch("menu.json");
+            retter = await minListe.json();
+            console.log(retter);
+            visPersoner(retter);
+            // find retter og filtrer retter efter kategori og gem dem i ny array 
+            let forretter = retter.filter(ret => ret.kategori == "forretter");
+            let hovedretter = retter.filter(ret => ret.kategori == "hovedretter");
+            let desserter = retter.filter(ret => ret.kategori == "desserter");
+            let drikkevarer = retter.filter(ret => ret.kategori == "drikkevarer");
+            document.querySelector("#filter-alle").addEventListener("click", () => {
+                visPersoner(retter), "Retter";
+            });
+            document.querySelector("#filter-forretter").addEventListener("click", () => {
+                visPersoner(forretter, "Forretter");
+            });
+            document.querySelector("#filter-hovedretter").addEventListener("click", () => {
+                visPersoner(hovedretter, "Hovedretter");
+            });
+            document.querySelector("#filter-desserter").addEventListener("click", () => {
+                visPersoner(desserter, "Desserter");
+            });
+            document.querySelector("#filter-drikkevarer").addEventListener("click", () => {
+                visPersoner(drikkevarer, "Drikkevarer");
+            });
+            visPersoner(retter, "menu");
+        }
+
+        function visPersoner(retter, overskrift) {
+            document.querySelector("[data-overskrift]").textContent = "overskrift";
+            let modtager = document.querySelector(".templatemodtager");
+            let template = document.querySelector(".mytemplate");
+            modtager.innerHTML = "";
+            retter.forEach(hverPerson => {
+                let klon = template.cloneNode(true).content;
+                klon.querySelector(".navn").textContent = hverPerson.navn;
+                klon.querySelector(".billede").setAttribute("src", "imgs/small/" + hverPerson.billede + "-sm.jpg");
+                klon.querySelector(".billede").alt = "billede af" + hverPerson.billede;
+                klon.querySelector(".kortbeskrivelse").textContent = hverPerson.kortbeskrivelse;
+                klon.querySelector(".langbeskrivelse").textContent = hverPerson.langbeskrivelse;
+                klon.querySelector(".pris").textContent = hverPerson.pris + (" kr.");
+                modtager.appendChild(klon);
+            })
+        }
+    </script>
+</body>
+
+</html>
